@@ -9,8 +9,16 @@ const { Navigator, Screen } = createBottomTabNavigator();
 import { Dashboard } from "../screens/Dashboard";
 import { Register } from "../screens/Register";
 
+export type AppRoutesParamList = {
+  Listagem: undefined; //
+  Cadastrar: undefined;
+  Resumo: undefined;
+};
+
 export function AppRoutes() {
   const theme = useTheme();
+
+  const { Navigator, Screen } = createBottomTabNavigator<AppRoutesParamList>();
 
   return (
     <Navigator

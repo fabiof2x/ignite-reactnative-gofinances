@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,6 +11,11 @@ import { CategorySelectButton } from "../../components/Form/CategorySelectButton
 import { CategorySelect } from "../CategorySelect";
 
 import { useForm } from "react-hook-form";
+import uuid from "react-native-uuid";
+import { useNavigation } from "@react-navigation/native";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { AppRoutesParamList } from "../../routes/app.routes";
+
 import { InputForm } from "../../components/Form/InputForm";
 
 import {
@@ -26,6 +31,11 @@ interface FormData {
   name: string;
   amount: string;
 }
+
+type RegisterNavigationProps = BottomTabNavigationProp<
+  AppRoutesParamList,
+  "Cadastrar"
+>;
 
 const schema = Yup.object().shape({
   name: Yup
@@ -48,9 +58,12 @@ export function Register() {
     name: 'Categoria',
   });
 
+  const navigation = useNavigation<RegisterNavigationProps>();
+
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors }
   } = useForm({
     resolver: yupResolver(schema)
@@ -76,10 +89,12 @@ export function Register() {
       return Alert.alert('Selecione a categoria')
 
     const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       transactionType,
-      category: category.key
+      category: category.key,
+      date: new Date()
     }
 
     try {
@@ -93,25 +108,20 @@ export function Register() {
 
       await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted));
 
+      reset();
+      setTransactionType('');
+      setCategory({
+        key: 'category',
+        name: 'Categoria',
+      });
+
+      navigation.navigate('Listagem');
+
     } catch (error) {
       console.log(error);
       Alert.alert("Não foi possível salvar")
     }
   }
-
-  useEffect(() => {
-    async function loadData() {
-      const data = await AsyncStorage.getItem(dataKey);
-      console.log(JSON.parse(data!));
-    }
-    loadData();
-
-    // async function removeAll() {
-    //   await AsyncStorage.removeItem(dataKey);
-    // }
-
-    // removeAll();
-  }, [])
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
