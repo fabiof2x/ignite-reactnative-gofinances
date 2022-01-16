@@ -52,15 +52,12 @@ export function Dashboard() {
     collection: DatalistProps[],
     type: 'positive' | 'negative'
   ) {
-    const lastTransaction =
+    const lastTransaction = new Date(
       Math.max.apply(Math, collection
         .filter(transaction => transaction.type === type)
-        .map(transaction => new Date(transaction.date).getTime()));
+        .map(transaction => new Date(transaction.date).getTime())))
 
-    return Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: "long",
-    }).format(new Date(lastTransaction));
+    return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString('pt-BR', { month: 'long' })}`;
   }
 
   async function loadTransactions() {
